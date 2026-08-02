@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LB Transportes — Dashboard</title>
+<style>
+:root{--bg:#0b0e14;--card:#151c29;--line:#26344a;--text:#e8edf5;--muted:#9aa8bb;--blue:#3b82f6;--green:#4ade80;--red:#f87171}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px Arial,sans-serif}main{max-width:1050px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}h1{margin:0;font-size:25px}.filters,.cards,.drivers{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}.filters{margin:24px 0}.box,.card,.table{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}label{display:block;color:var(--muted);font-size:12px;margin-bottom:7px}select{width:100%;background:#0d1420;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:11px;font-size:15px}.card small{color:var(--muted)}.value{font-size:27px;font-weight:bold;margin-top:8px}.green{color:var(--green)}.red{color:var(--red)}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 10px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-size:12px;text-transform:uppercase}.notice{color:var(--muted);margin:22px 0 12px}.active{color:var(--blue)}
+</style></head>
+<body><main>
+<div class="top"><h1>LB Transportes</h1><div id="period" class="active"></div></div>
+<div class="filters"><div class="box"><label>MÊS DE REFERÊNCIA</label><select id="month"></select></div><div class="box"><label>ANO DE REFERÊNCIA</label><select id="year"><option>2025</option><option selected>2026</option><option>2027</option></select></div><div class="box"><label>MOTORISTA</label><select id="driver"><option value="todos">Todos</option><option value="cristiano">Cristiano Mutakaia</option><option value="unai">Unai</option><option value="amauri">Amauri</option></select></div></div>
+<section class="cards"><div class="card"><small>ENTREGAS</small><div id="deliveries" class="value green">0</div></div><div class="card"><small>FALHADOS</small><div id="failed" class="value">0</div></div><div class="card"><small>PENDENTES</small><div id="pending" class="value">0</div></div><div class="card"><small>COMBUSTÍVEL</small><div id="fuel" class="value red">€ 0,00</div></div></section>
+<div class="notice">Dados exibidos para o mês, ano e motorista selecionados</div><section class="table"><table><thead><tr><th>Motorista</th><th>Entregues</th><th>Falhados</th><th>Pendentes</th><th>Combustível</th></tr></thead><tbody id="rows"></tbody></table></section>
+</main>
+<script>
+const months=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const empty=()=>({deliveries:0,failed:0,pending:0,fuel:0});
+const data={Julho:{cristiano:{deliveries:88,failed:4,pending:0,fuel:170},unai:{deliveries:0,failed:0,pending:0,fuel:105.65},amauri:empty()},Agosto:{cristiano:{deliveries:0,failed:0,pending:0,fuel:30},unai:empty(),amauri:empty()}};
+const names={cristiano:'Cristiano Mutakaia',unai:'Unai',amauri:'Amauri'};
+const month=document.querySelector('#month'); months.forEach((m,i)=>month.add(new Option(m,m))); month.value='Julho';
+const money=n=>new Intl.NumberFormat('pt-PT',{style:'currency',currency:'EUR'}).format(n);
+function update(){const m=month.value,y=document.querySelector('#year').value,d=document.querySelector('#driver').value;const all=data[m]||{cristiano:empty(),unai:empty(),amauri:empty()};const list=d==='todos'?Object.entries(all):[[d,all[d]||empty()]];let t={deliveries:0,failed:0,pending:0,fuel:0};document.querySelector('#rows').innerHTML=list.map(([key,v])=>{Object.keys(t).forEach(k=>t[k]+=v[k]);return `<tr><td>${names[key]}</td><td>${v.deliveries}</td><td>${v.failed}</td><td>${v.pending}</td><td class="red">${money(v.fuel)}</td></tr>`}).join('');document.querySelector('#deliveries').textContent=t.deliveries;document.querySelector('#failed').textContent=t.failed;document.querySelector('#pending').textContent=t.pending;document.querySelector('#fuel').textContent=money(t.fuel);document.querySelector('#period').textContent=`${m} ${y}`}
+month.onchange=update;document.querySelector('#year').onchange=update;document.querySelector('#driver').onchange=update;update();
+</script></body></html>
